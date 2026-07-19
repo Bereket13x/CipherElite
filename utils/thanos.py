@@ -18,8 +18,8 @@ def _positions(length: int, count: int, seed: str) -> List[int]:
     return sorted(rng.sample(range(length + count), count))
 
 def thanos_protect(obf: str) -> str:
-
-
+    if len(obf) < len(SALT1) + len(SALT2):
+        return obf
     pos2 = _positions(len(obf) - len(SALT2), len(SALT2), seed=SALT2)
     lst = list(obf)
     for idx in sorted(pos2, reverse=True):

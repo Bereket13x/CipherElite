@@ -1,5 +1,9 @@
 from dotenv import load_dotenv
 import os
+from pathlib import Path
+
+# Resolve the PARADOX logo path relative to this file (always correct)
+_PARADOX_IMG = str(Path(__file__).parent / "images" / "paradox.jpg")
 
 
 load_dotenv()
@@ -7,7 +11,6 @@ load_dotenv()
 # api Configuration
 API_ID = int(os.getenv("API_ID", "10248430"))  
 API_HASH = os.getenv("API_HASH", "42396a6ff14a569b9d59931643897d0d")  
-# @var
 #Please generate a session using @elite_session_maker_bot else your session not working 
 ELITE_SESSION = os.getenv("ELITE_SESSION", "INVALID_SESSION")  
 # Bot Settings
@@ -20,16 +23,16 @@ SUDO_USERS = [int(x) for x in os.getenv("SUDO_USERS", "5470956337").split(",") i
 LOG_CHAT_ID = int(os.getenv("LOG_CHAT_ID", "0"))
 
 # Image URLs
-PMPERMIT_PIC = os.getenv("PMPERMIT_PIC", "https://files.catbox.moe/tocisn.png")  
-ALIVE_PIC = os.getenv("ALIVE_PIC", "https://files.catbox.moe/tocisn.png") 
-PING_PIC = os.getenv("PING_PIC", "https://files.catbox.moe/tocisn.png")
-
-# alive name
-ALIVE_NAME = os.getenv("ALIVE_NAME", "rishabh")  
+PMPERMIT_PIC = os.getenv("PMPERMIT_PIC", _PARADOX_IMG)
+ALIVE_PIC = os.getenv("ALIVE_PIC", _PARADOX_IMG)
+PING_PIC = os.getenv("PING_PIC", _PARADOX_IMG)
 
 # Update Configuration
-UPSTREAM_REPO = os.getenv("UPSTREAM_REPO", "https://github.com/rishabhops/CipherElite")
-BRANCH = os.getenv("BRANCH", "elite")
+UPSTREAM_REPO = os.getenv("UPSTREAM_REPO", "https://github.com/Bereket13x/paradoxbot")  # set to your fork
+BRANCH = os.getenv("BRANCH", "main")
+
+# Twitter/X Integration
+TWITTER_BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN", "")
 
 # for  debugging dont edit this
 if API_ID == 0:

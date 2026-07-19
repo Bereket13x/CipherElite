@@ -1,4 +1,4 @@
-# This plugin is part of the Cipher Elite Telegram UserBot
+# This plugin is part of the PARADOX Telegram UserBot
 # Author: Rishabh (https://github.com/rishabhops)
 # License: MIT License — See LICENSE file for full text
 
@@ -143,3 +143,4 @@ async def register_commands():
             except:
                 await event.reply("❌ Failed to unpin message. Make sure you have the right permissions!")
                 
+

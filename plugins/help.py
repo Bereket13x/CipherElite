@@ -20,7 +20,7 @@ def init(client_instance):
         ".quickhelp - Show this quick help guide"
     ]
     
-    quickhelp_description = "⚡ Cipher Elite Help System - Complete guide to using the advanced help features"
+    quickhelp_description = "⚡ PARADOX Help System - Complete guide to using the advanced help features"
     
     # Add to CMD_LIST so it appears in help menu
     CMD_LIST["quickhelp"] = {
@@ -115,7 +115,7 @@ async def register_commands():
                     msg = await event.client.get_messages(event.chat_id, ids=help_msg.id)
                     # If edit_date is None, the user hasn't clicked any buttons yet
                     if msg and msg.edit_date is None:
-                        await msg.edit("<i>⏳ Cipher Elite help session expired.</i>", parse_mode='html', buttons=None)
+                        await msg.edit("<i>⏳ PARADOX help session expired.</i>", parse_mode='html', buttons=None)
                 except Exception:
                     pass
             
@@ -264,3 +264,4 @@ async def register_commands():
             
         except Exception as e:
             await event.reply(f"❌ <b>Error:</b> {str(e)}", parse_mode='html')
+

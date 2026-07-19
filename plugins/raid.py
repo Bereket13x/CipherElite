@@ -149,7 +149,7 @@ ENGLISH_RAIDS = [
 ]
 
 ACTIVATION_MESSAGE = """
-🎭 **CIPHER ELITE RAID ACTIVATED** 🎭
+🎭 **PARADOX RAID ACTIVATED** 🎭
 
 🎯 **Target:** {}
 🆔 **Target ID:** `{}`
@@ -158,7 +158,7 @@ ACTIVATION_MESSAGE = """
 🛡️ **Protection:** Elite Shield Active
 ✅ **Status:** Operational
 
-🤖 **Powered by CipherElite**
+🤖 **Powered by PARADOX**
 """
 
 def init(client_instance):
@@ -167,7 +167,7 @@ def init(client_instance):
         ".dreplyraid - ❌ Deactivate active raid system", 
         ".raidinfo - 📊 Display raid statistics and data"
     ]
-    description = "🎭 Cipher Elite Raid System - Advanced bilingual raiding with flexible targeting"
+    description = "🎭 PARADOX Raid System - Advanced bilingual raiding with flexible targeting"
     add_handler("raid", commands, description)
 
 async def parse_user_target(event, args):
@@ -242,7 +242,7 @@ async def register_commands():
             user = await parse_user_target(event, args)
             
             if not user:
-                await event.reply("🎭 **Cipher Elite Raid System**"
+                await event.reply("🎭 **PARADOX Raid System**"
                                 "❌ **Error:** No target specified!"
                                 "💡 **Usage Options:**"
                                 "• Reply to user's message: `.replyraid hindi`"
@@ -253,7 +253,7 @@ async def register_commands():
             
             # Check if target is the bot owner
             if user.id == CIPHER_ELITE_OWNER:
-                await event.reply("🎭 **Cipher Elite Security Protocol**"
+                await event.reply("🎭 **PARADOX Security Protocol**"
                                 "🛡️ **Access Denied:** You Cannot target my developer Rishabh"
                                 "🔒 **Security Level:** Maximum Protection Active"
                                 "⚠️ **Status:** Operation Blocked by Elite Shield")
@@ -261,7 +261,7 @@ async def register_commands():
             
             # Check if already raiding this user
             if user.id in active_raids["users"]:
-                await event.reply("🎭 **Cipher Elite Raid System**"
+                await event.reply("🎭 **PARADOX Raid System**"
                                 f"⚠️ **Already raiding:** {utils.get_display_name(user)}"
                                 f"💡 **Tip:** Use `.dreplyraid` to stop the current raid first")
                 return
@@ -283,11 +283,11 @@ async def register_commands():
             await event.reply(activation_msg)
             
         except ValueError as e:
-            await event.reply(f"🎭 **Cipher Elite System Error**"
+            await event.reply(f"🎭 **PARADOX System Error**"
                             f"❌ **Error:** {str(e)}"
                             f"💡 **Tip:** Make sure the username/ID exists and is accessible")
         except Exception as e:
-            await event.reply(f"🎭 **Cipher Elite System Error**"
+            await event.reply(f"🎭 **PARADOX System Error**"
                             f"❌ **Error:** {str(e)}")
 
     @CipherElite.on(events.NewMessage(pattern=r".raidinfo"))
@@ -297,7 +297,7 @@ async def register_commands():
             info = f"{RAID_BANNER}🎭 **ACTIVE RAID STATISTICS**"
             
             if not active_raids["users"]:
-                return await event.reply("🎭 **Cipher Elite Raid Monitor**"
+                return await event.reply("🎭 **PARADOX Raid Monitor**"
                                        "❌ **No active raids detected**"
                                        "💡 **Use `.replyraid` to start raiding**"
                                        "📊 **All systems are idle**")
@@ -319,7 +319,7 @@ async def register_commands():
                     info += f"🎯 **Target ID:** `{user_id}`"
                     info += f"⚠️ **Status:** Entity unavailable"
                 
-            info += f"🤖 **Powered by CipherElite Raid System**"
+            info += f"🤖 **Powered by PARADOX Raid System**"
             await event.reply(info)
         except Exception as e:
             await event.reply(f"🎭 **Raid Info Error:** {str(e)}")
@@ -345,13 +345,13 @@ async def register_commands():
                         user = await event.client.get_entity(username)
                         user_id = user.id
                 except Exception:
-                    await event.reply("🎭 **Cipher Elite Raid System**"
+                    await event.reply("🎭 **PARADOX Raid System**"
                                     "❌ **Error:** Could not find specified user"
                                     "💡 **Check username/ID and try again**")
                     return
             
             if not user_id:
-                await event.reply("🎭 **Cipher Elite Raid Deactivation**"
+                await event.reply("🎭 **PARADOX Raid Deactivation**"
                                 "❌ **Error:** No target specified!"
                                 "💡 **Usage Options:**"
                                 "• Reply to user's message: `.dreplyraid`"
@@ -368,16 +368,17 @@ async def register_commands():
                 del active_raids["start_time"][user_id]
                 del active_raids["language"][user_id]
                 
-                await event.reply("🎭 **CIPHER ELITE RAID DEACTIVATED** 🎭"
+                await event.reply("🎭 **PARADOX RAID DEACTIVATED** 🎭"
                                 f"✅ **Successfully Stopped**"
                                 f"💥 **Total Hits:** {final_hits}"
                                 f"⏱️ **Duration:** {duration}s"
                                 f"🛡️ **Elite Shield:** Restored"
-                                f"🤖 **Powered by CipherElite**")
+                                f"🤖 **Powered by PARADOX**")
             else:
-                await event.reply("🎭 **Cipher Elite Raid System**"
+                await event.reply("🎭 **PARADOX Raid System**"
                                 "❌ **No active raid found for this user**"
                                 "💡 **Target is not currently being raided**")
                                 
         except Exception as e:
             await event.reply(f"🎭 **Deactivation Error:** {str(e)}")
+

@@ -40,7 +40,7 @@ async def register_commands():
                     f"[Changelog]({data['magisk']['note']})\n"
                 )
 
-            await status.edit(f"🎭 **Cipher Elite Magisk**\n\n"
+            await status.edit(f"🎭 **PARADOX Magisk**\n\n"
                               f"{releases}\n"
                               f"✅ **Success!**")
         except Exception as e:
@@ -67,7 +67,7 @@ async def register_commands():
                         f"🏷 **Name**: `{item['name']}`\n"
                         f"🔢 **Model**: `{item['model']}`\n\n"
                     )
-                await status.edit(f"🎭 **Cipher Elite Device Search**\n\n"
+                await status.edit(f"🎭 **PARADOX Device Search**\n\n"
                                   f"🔎 **Result for:** `{codename}`\n\n"
                                   f"{reply_text}"
                                   f"✅ **Found!**")
@@ -117,7 +117,7 @@ async def register_commands():
                         f"🏷 **Name**: `{item['name']}`\n"
                         f"🔢 **Model**: `{item['model']}`\n\n"
                     )
-                await status.edit(f"🎭 **Cipher Elite Codename Search**\n\n"
+                await status.edit(f"🎭 **PARADOX Codename Search**\n\n"
                                   f"{reply_text}"
                                   f"✅ **Success!**")
             else:
@@ -148,7 +148,7 @@ async def register_commands():
             size = page.find("span", {"class": "filesize"}).text
             date = page.find("em").text.strip()
             
-            await status.edit(f"🎭 **Cipher Elite TWRP Finder**\n\n"
+            await status.edit(f"🎭 **PARADOX TWRP Finder**\n\n"
                               f"📱 **Device:** `{device}`\n"
                               f"💾 **File:** `{dl_file}`\n"
                               f"📦 **Size:** `{size}`\n"
@@ -157,3 +157,4 @@ async def register_commands():
                               f"✅ **Success!**")
         except Exception as e:
             await status.edit(f"❌ **Error:** {str(e)}")
+

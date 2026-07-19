@@ -1,5 +1,4 @@
 from functools import wraps
-from telethon import events  # Required to check the event type
 from telethon.tl.functions.channels import GetParticipantRequest
 from telethon.tl.types import ChannelParticipantAdmin, ChannelParticipantCreator
 from telethon.errors import UserNotParticipantError, ChatAdminRequiredError
@@ -14,23 +13,10 @@ async def is_owner_or_sudo(event):
     or a registered Sudo User.
     """
     sender_id = event.sender_id
+    me = await event.client.get_me()
     
-    # 1. Check if the sender is the automatically extracted OWNER_ID
-    if hasattr(Config, 'OWNER_ID') and sender_id == Config.OWNER_ID:
+    if sender_id == me.id or sender_id in Config.SUDO_USERS:
         return True
-        
-    # 2. Check if the sender is in the SUDO_USERS list
-    if hasattr(Config, 'SUDO_USERS') and sender_id in Config.SUDO_USERS:
-        return True
-
-    # 3. Fallback: If the event is on the userbot client, me.id will match sender_id
-    try:
-        me = await event.client.get_me()
-        if sender_id == me.id:
-            return True
-    except Exception:
-        pass
-        
     return False
 
 # ==========================================
@@ -78,7 +64,7 @@ def authorized_users_only(func=None):
                 pass
             
             # 🎭 Deny access
-            await event.reply("🎭 **Cipher Elite Access Denied**\n\n"
+            await event.reply("🎭 **PARADOX Access Denied**\n\n"
                              "❌ **This command is restricted to admins only!**\n"
                              "🛡️ **Required:** Admin privileges, Sudo access, or Bot Owner")
             return
@@ -98,12 +84,68 @@ def rishabh(func=None):
         @wraps(f)
         async def wrapper(event):
             sender_id = event.sender_id
-            
+
             if not await is_owner_or_sudo(event):
                 print(f"❌ Unauthorized access attempt by {sender_id}")
                 return
-            
+
             print(f"✅ Owner/Sudo user {sender_id} executing command: {f.__name__}")
+
+            # ── Capture reply target BEFORE deleting the command ──────────────
+            # If the user was replying to a message, responses will also reply
+            # to that same original message. Otherwise sent as a plain message.
+            original_reply_to = event.reply_to_msg_id  # None if not a reply
+
+            # ── Delete the command message immediately ─────────────────────────
+            try:
+                await event.delete()
+            except Exception:
+                pass  # silently ignore if already deleted / no permission
+
+            # ── Track last response for edit-chain support ─────────────────────
+            # Plugins often do: event.edit("step 1") … event.edit("step 2")
+            # After the command is deleted, the first edit must send a new message;
+            # subsequent ones should edit that same message.
+            _state = {"last": None}
+
+            # ── Patch event.reply ──────────────────────────────────────────────
+            async def smart_reply(message=None, *args, **kwargs):
+                kwargs.pop("reply_to", None)
+                if original_reply_to:
+                    kwargs["reply_to"] = original_reply_to
+                msg = await event.respond(message, *args, **kwargs)
+                _state["last"] = msg
+                return msg
+
+            # ── Patch event.edit ───────────────────────────────────────────────
+            # First call → send new message (original is deleted).
+            # Subsequent calls → edit that message (animation/progress updates).
+            async def smart_edit(message=None, *args, **kwargs):
+                if _state["last"] is not None:
+                    try:
+                        return await _state["last"].edit(message, *args, **kwargs)
+                    except Exception:
+                        pass  # fall through to send new if edit fails
+                # Send fresh message
+                kwargs.pop("reply_to", None)
+                if original_reply_to:
+                    kwargs["reply_to"] = original_reply_to
+                msg = await event.respond(message, *args, **kwargs)
+                _state["last"] = msg
+                return msg
+
+            event.reply = smart_reply
+            event.edit = smart_edit
+
+            # ── Patch event.delete to a no-op ─────────────────────────────────
+            # Many plugins call event.delete() themselves as a leftover pattern.
+            # Since we already deleted the command above, a second delete would
+            # crash. Make it silently do nothing instead.
+            async def noop_delete(*args, **kwargs):
+                pass
+
+            event.delete = noop_delete
+
             return await f(event)
         return wrapper
 
@@ -122,22 +164,11 @@ def rishabh_help(func=None):
         async def wrapper(event):
             
             if not await is_owner_or_sudo(event):
-                error_msg = (
-                    "🎭 **Cipher Elite Access Restricted!**\n\n"
-                    "🔒 **Deploy your own Cipher Elite Bot:**\n"
-                    "https://github.com/rishabhops/CipherElite\n\n"
-                    "⚡ **Unauthorized access denied**"
+                await event.answer(
+                    "🎭 **PARADOX Access Restricted!**\n\n"
+                    "⚡ **Unauthorized access denied**", 
+                    alert=True
                 )
-                
-                # Safely handle the response based on the incoming event type
-                if isinstance(event, events.CallbackQuery.Event):
-                    await event.answer(error_msg, alert=True)
-                elif isinstance(event, events.InlineQuery.Event):
-                    # Inline queries require a list of results. Passing an empty list prevents the timeout crash.
-                    await event.answer([]) 
-                else:
-                    # Fallback for standard messages
-                    await event.reply(error_msg)
                 return
                 
             return await f(event)

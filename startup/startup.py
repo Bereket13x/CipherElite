@@ -13,6 +13,7 @@ from telethon.tl.functions.bots import SetBotCommandsRequest
 from telethon.tl.functions.photos import UploadProfilePhotoRequest, DeletePhotosRequest
 from telethon.tl.functions.account import UpdateProfileRequest
 from telethon.tl.functions.users import GetFullUserRequest
+from telethon.tl.types import BotCommand, BotCommandScopeDefault, BotCommandScopePeer
 
 from plugins.bot import init_bot
 from utils.utils import init_client
@@ -51,11 +52,6 @@ async def load_bot_plugins(bot_client, user_client):
     owner = await user_client.get_me()
     owner_id = owner.id
     owner_name = owner.first_name or "Owner"
-    
-    # 👇 INJECT OWNER ID TO CONFIG HERE 👇
-    from config.config import Config
-    Config.OWNER_ID = owner_id
-    # 👆 ============================== 👆
 
     plugins = [
         f"bot_plugins.{f.stem}"
@@ -104,7 +100,7 @@ async def display_startup_message(client, plugins, bot_plugins):
     user_name = (await client.get_me()).first_name
     banner = f"""
 \033[1;36m=====================
- CIPHER ELITE USERBOT
+   PARADOX USERBOT
 =====================
 \033[1;32mStatus   : ONLINE
 Python   : v{system_info["python"]}
@@ -114,7 +110,7 @@ Plugins  : {len(plugins)} UB | {len(bot_plugins)} Bot
 User     : {user_name}
 Started  : {system_info["uptime"]}
 \033[1;36m=====================
-\033[1;33mElite Power Activated!\033[0m
+\033[1;33mPARADOX Activated!\033[0m
 """
     print(banner)
     return system_info
@@ -124,21 +120,18 @@ async def configure_bot_via_botfather(user_client, bot_username):
     user = await user_client.get_me()
     user_first_name = user.first_name
     
-    bot_name = f"{user_first_name}'s Assistant"
+    bot_name = "Paradox's Assistant"
     bot_bio = (
-        f"🤖 Personal Assistant Bot for {user_first_name}\n\n"
-        "🔰 Cipher Elite Userbot Assistant\n"
-        "⚡ Powered by thanospros\n"
-        "🛡️ Advanced Automation & Management\n\n"
-        "🔗 Support: @thanosprosss"
+        "🤖 Personal Assistant Bot for Paradox\n\n"
+        "🔰 PARADOX Userbot Assistant\n"
+        "⚡ Advanced Automation & Management\n"
+        "🛡️ Personal & Secure"
     )
-    bot_about = f"🤖 Assistant for {user_first_name} | Cipher Elite | @thanosprosss"
+    bot_about = "🤖 Assistant for Paradox | PARADOX"
     
     desired_commands = {
         "start": "Start the bot",
-        "help": "Show help information",
-        "ping": "Check bot responsiveness",
-        "status": "Show system status"
+        "help": "Show help information"
     }
 
     print(f"\033[1;34m🔍 Checking current @{bot_username} settings...\033[0m")
@@ -175,16 +168,6 @@ async def configure_bot_via_botfather(user_client, bot_username):
     
     try:
         async with user_client.conversation('BotFather') as conv:
-            if needs_commands:
-                print("\033[1;36m➡️ Updating commands...\033[0m")
-                await conv.send_message("/setcommands")
-                await asyncio.sleep(1)
-                await conv.send_message(f"@{bot_username}")
-                await asyncio.sleep(1)
-                commands_str = "\n".join([f"{k} - {v}" for k, v in desired_commands.items()])
-                await conv.send_message(commands_str)
-                await asyncio.sleep(2)
-                
             if needs_name:
                 print("\033[1;36m➡️ Updating name...\033[0m")
                 await conv.send_message("/setname")
@@ -220,8 +203,48 @@ async def configure_bot_via_botfather(user_client, bot_username):
         print("\033[1;33m⚠️ Please configure bot manually through @BotFather if necessary.\033[0m")
         return False
 
+async def configure_bot_commands(bot_client, user_client):
+    """Set scoped commands so only the owner sees admin commands"""
+    print("\033[1;34m🔍 Updating bot command scopes...\033[0m")
+    try:
+        user = await user_client.get_me()
+        try:
+            user_peer = await bot_client.get_input_entity(user.id)
+        except Exception:
+            # If bot hasn't seen the user yet, send a message to cache the entity
+            await bot_client.send_message(user.id, "Initialization...")
+            user_peer = await bot_client.get_input_entity(user.id)
+            
+        # 1. Global commands (everyone)
+        await bot_client(SetBotCommandsRequest(
+            scope=BotCommandScopeDefault(),
+            lang_code='',
+            commands=[
+                BotCommand(command="start", description="Start the bot"),
+                BotCommand(command="help", description="Show help information")
+            ]
+        ))
+        
+        # 2. Owner-only commands
+        await bot_client(SetBotCommandsRequest(
+            scope=BotCommandScopePeer(user_peer),
+            lang_code='',
+            commands=[
+                BotCommand(command="start", description="Start the bot"),
+                BotCommand(command="help", description="Show help information"),
+                BotCommand(command="ping", description="Check bot responsiveness"),
+                BotCommand(command="status", description="Show system status"),
+                BotCommand(command="assistant", description="Manage assistant settings")
+            ]
+        ))
+        print("\033[1;32m✅ Bot commands successfully scoped and updated\033[0m")
+        return True
+    except Exception as e:
+        print(f"\033[1;31m❌ Failed to set bot command scopes: {e}\033[0m")
+        return False
+
 async def update_bot_profile_picture(bot_client, user_client):
-    """Update bot profile picture using cipher.jpg if it doesn't have one already"""
+    """Update bot profile picture using paradox.jpg if it doesn't have one already"""
     try:
         print("\033[1;34m🔍 Checking bot profile picture status...\033[0m")
         current_photos = await bot_client.get_profile_photos('me', limit=1)
@@ -230,17 +253,17 @@ async def update_bot_profile_picture(bot_client, user_client):
             print("\033[1;32m✅ Bot already has a profile picture - Skipping upload\033[0m")
             return True
 
-        cipher_image_path = Path(__file__).parent.parent / "images" / "cipher.jpg"
+        paradox_image_path = Path(__file__).parent.parent / "images" / "paradox.jpg"
         
-        if not cipher_image_path.exists():
-            print(f"\033[1;31m❌ cipher.jpg not found at: {cipher_image_path}\033[0m")
+        if not paradox_image_path.exists():
+            print(f"\033[1;31m❌ paradox.jpg not found at: {paradox_image_path}\033[0m")
             return False
         
-        print(f"\033[1;33m📸 No profile picture found. Uploading from: {cipher_image_path}\033[0m")
-        file = await bot_client.upload_file(str(cipher_image_path))
+        print(f"\033[1;33m📸 No profile picture found. Uploading from: {paradox_image_path}\033[0m")
+        file = await bot_client.upload_file(str(paradox_image_path))
         await bot_client(UploadProfilePhotoRequest(file=file))
         
-        print(f"\033[1;32m✅ Bot profile picture successfully updated with cipher.jpg\033[0m")
+        print(f"\033[1;32m✅ Bot profile picture successfully updated with paradox.jpg\033[0m")
         return True
         
     except Exception as e:
@@ -296,7 +319,7 @@ async def ensure_bot_in_group(bot_client, user_client, log_chat_id):
                     channel=chat,
                     user_id=bot_username if bot_username else bot_id,
                     admin_rights=admin_rights,
-                    rank="Cipher Elite Bot"
+                    rank="PARADOX Bot"
                 ))
                 return True
             except Exception as e:
@@ -320,7 +343,7 @@ async def send_startup_message(bot_client, user_client, plugins, bot_plugins, sy
         
         message = (
             "=====================\n"
-            "**CIPHER ELITE USERBOT**\n"
+            "**PARADOX USERBOT**\n"
             "=====================\n"
             f"**Status**: ONLINE\n"
             f"**User**: {user.first_name} (`{user.id}`)\n"
@@ -331,11 +354,11 @@ async def send_startup_message(bot_client, user_client, plugins, bot_plugins, sy
             f"**Plugins**: {len(plugins)} UB | {len(bot_plugins)} Bot\n"
             f"**Started**: {system_info['uptime']}\n"
             "=====================\n"
-            "**Elite Power Activated!**"
+            "**PARADOX Activated!**"
         )
         
-        buttons = [[Button.url("Support", "https://t.me/thanosprosss")]]
-        logo_url = "https://files.catbox.moe/tocisn.png"
+        buttons = None
+        logo_url = str(Path(__file__).parent.parent / "images" / "paradox.jpg")
         
         try:
             chat_entity = await user_client.get_entity(config.LOG_CHAT_ID)
@@ -344,16 +367,16 @@ async def send_startup_message(bot_client, user_client, plugins, bot_plugins, sy
             except Exception:
                 bot_chat_entity = chat_entity
             
-            await bot_client.send_message(bot_chat_entity, message, file=logo_url, buttons=buttons)
+            await bot_client.send_message(bot_chat_entity, message, file=logo_url)
         except Exception:
-            await bot_client.send_message(config.LOG_CHAT_ID, message, file=logo_url, buttons=buttons)
+            await bot_client.send_message(config.LOG_CHAT_ID, message, file=logo_url)
             
     except Exception as e:
         print(f"\033[1;31mError sending startup message: {e}\033[0m")
 
 async def start_bot(client):
     print("\n\033[1;36m==================================================")
-    print("      Initializing CIPHER ELITE USERBOT")
+    print("         Initializing PARADOX USERBOT")
     print("==================================================\033[0m\n")
 
     required_configs = [
@@ -368,15 +391,7 @@ async def start_bot(client):
     await client.start()
     init_client(client)
 
-    for url, name in [
-        ("https://t.me/THANOS_PRO", "channel"),
-        ("https://t.me/cipherelite_support", "group")
-    ]:
-        try:
-            await client(JoinChannelRequest(url))
-            print(f"\033[1;32mJoined {name}: {url}\033[0m")
-        except Exception as e:
-            pass # Keep terminal clean on join fails
+    # No auto-join channels
 
     bot = await init_bot(client)
     bot_plugins = [] # Initialize empty list for scope
@@ -389,6 +404,8 @@ async def start_bot(client):
         
         print("\033[1;33m🔄 Configuring bot via BotFather...\033[0m")
         await configure_bot_via_botfather(client, bot_me.username)
+        
+        await configure_bot_commands(bot, client)
         
         print("\033[1;33m🔄 Updating bot profile picture...\033[0m")
         await update_bot_profile_picture(bot, client)
@@ -407,7 +424,7 @@ async def start_bot(client):
     if bot:
         await send_startup_message(bot, client, plugins, bot_plugins, system_info, Config)
 
-    print("\033[1;32mCipher Elite is ready and serving!\033[0m")
+    print("\033[1;32mPARADOX is ready and serving!\033[0m")
     await asyncio.gather(
         client.run_until_disconnected(),
         bot.run_until_disconnected() if bot else asyncio.sleep(float('inf'))

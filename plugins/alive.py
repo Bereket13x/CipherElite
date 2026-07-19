@@ -29,17 +29,12 @@ CONFIG_FILE = DB_DIR / "alive_config.json"
 
 
 # ---------------------------------------------------------------------------
-ALIVE_BUTTONS = [
-    [
-        Button.url("💬 Support", "https://t.me/cipherelite_support"),
-        Button.url("📢 Channel", "https://t.me/THANOS_PRO"),
-    ]
-]
+ALIVE_BUTTONS = []  # No promotional buttons
 
 # Global cache to pass data from Userbot -> Assistant Bot
 # This ensures the bot sends exactly what the userbot calculated.
 INLINE_DATA = {
-    "alive_text": "CipherElite is Online",
+    "alive_text": "PARADOX is Online",
     "alive_media": None,
     "ping_text": "Pong!",
     "ping_media": None
@@ -112,7 +107,7 @@ def get_readable_time(seconds: float) -> str:
     return ":".join(reversed(time_list))
 
 ALIVE_STYLES = [
-    r"""⚡ 𝘾𝙄𝙋𝙃𝙀𝙍 𝙀𝙇𝙄𝙏𝙀 𝙎𝙔𝙎𝙏𝙀𝙈 ⚡
+    r"""⚡ 𝙋𝘼𝙍𝘼𝘿𝙊𝙓 𝙎𝙔𝙎𝙏𝙀𝙈 ⚡
 
 ▰▱▰▱▰▱▰▱▰▱▰▱▰▱
 ➺ 𝙈𝘼𝙎𝙏𝙀𝙍: {name}
@@ -120,12 +115,12 @@ ALIVE_STYLES = [
 ➺ 𝙏𝙀𝙇𝙀𝙏𝙃𝙊𝙉: {telethon}
 ▰▱▰▱▰▱▰▱▰▱▰▱▰▱
 
-⚔️ 𝙋𝙇𝙐𝙶𝙄𝙉𝙎: {plugins}
+⚔️ 𝙋𝙇𝙐𝙂𝙄𝙉𝙎: {plugins}
 ⚔️ 𝙐𝙋𝙏𝙄𝙈𝙀: {uptime}
 ⚔️ 𝘽𝙍𝘼𝙉𝘾𝙃: MASTER
 
-▰▱▰▱ ELITE NETWORK ▰▱▰▱""",
-    r"""╔══『 CIPHER ELITE 』══╗
+▰▱▰▱ PARADOX NETWORK ▰▱▰▱""",
+    r"""╔══『 PARADOX 』══╗
 
 ◈ CODENAME: {name}
 ◈ VERSION: [1.0]
@@ -135,7 +130,7 @@ ALIVE_STYLES = [
 ▣ UPTIME: {uptime}
 ▣ STATUS: OPERATIONAL
 
-╚══『 ELITE FORCE 』══╝""",
+╚══『 PARADOX FORCE 』══╝""",
 ]
 
 PING_STYLES = [
@@ -150,7 +145,7 @@ PING_STYLES = [
 ◈ SPEED: [{speed}ms]
 ◈ UPTIME: [{uptime}]
 
-╚══『 CIPHER ELITE 』══╝""",
+╚══『 PARADOX 』══╝""",
 ]
 
 user_config = UserConfig()
@@ -184,7 +179,7 @@ async def alive(event):
         else ALIVE_STYLES[user_config.alive_style_index]
     )
     text = template.format(
-        name=event.sender.first_name,
+        name=(event.sender.first_name if event.sender else (await event.client.get_me()).first_name),
         telethon=version.__version__,
         plugins=len(CMD_LIST),
         uptime=uptime
@@ -209,15 +204,17 @@ async def alive(event):
         # Fallback to plain text if bot is down or not configured
         await event.reply(text, file=INLINE_DATA["alive_media"])
         if "username" in str(e).lower():
-            print("❌ Cipher Error: Config.TG_BOT_USERNAME is missing or invalid.")
+            print("❌ PARADOX Error: Config.TG_BOT_USERNAME is missing or invalid.")
 
 
 @CipherElite.on(events.NewMessage(pattern=r"\.ping"))
 @rishabh()
 async def ping(event):
     start = datetime.now()
-    # Note: speed calculation is slightly off with inline, but acceptable
-    elapsed = (datetime.now() - start).microseconds // 1000
+    ping_msg = await event.reply("`...`")
+    end = datetime.now()
+    elapsed = int((end - start).total_seconds() * 1000)
+    
     uptime = get_readable_time((datetime.now() - START_TIME).total_seconds())
     template = (
         user_config.custom_ping_text
@@ -238,7 +235,9 @@ async def ping(event):
             hide_via=True
         )
         await event.delete()
+        await ping_msg.delete()
     except Exception:
+        await ping_msg.delete()
         await event.reply(text, file=INLINE_DATA["ping_media"])
 
 # ============================================================================

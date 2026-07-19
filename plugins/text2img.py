@@ -1,5 +1,5 @@
 """
-CipherElite Text-to-Image Plugin
+PARADOX Text-to-Image Plugin
 Created: 08/04/2026
 """
 
@@ -20,7 +20,7 @@ def init(client_instance):
     commands = [
         ".t2i <prompt> - Generate image from text"
     ]
-    description = "🎨 CipherElite Text-to-Image – Powered by CipherElite"
+    description = "🎨 PARADOX Text-to-Image – Generate images from text prompts"
     add_handler("text2img", commands, description)
 
 async def register_commands():
@@ -35,7 +35,7 @@ async def register_commands():
 
             prompt = event.pattern_match.group(1).strip()
             if not prompt:
-                await event.reply("🎨 **CipherElite Text-to-Image**\n\n"
+                await event.reply("🎨 **PARADOX Text-to-Image**\n\n"
                                 "❌ **Usage:** `.t2i <prompt>`\n"
                                 "Example: `.t2i a 3d heart`\n"
                                 "Example: `.t2i a beautiful sunset`")
@@ -45,7 +45,7 @@ async def register_commands():
             encoded_plus = prompt.replace(' ', '+')
             url = f"{API_BASE}/generate?prompt={encoded_plus}"
             
-            status = await event.reply(f"🎨 **CipherElite Text-to-Image**\n\n"
+            status = await event.reply(f"🎨 **PARADOX Text-to-Image**\n\n"
                                      f"🔄 Generating image for:\n`{prompt}`\n\n"
                                      f"⏳ Please wait...")
 
@@ -61,9 +61,9 @@ async def register_commands():
                     await event.client.send_file(
                         event.chat_id,
                         image_data,
-                        caption=f"🎨 **CipherElite Text-to-Image**\n\n"
+                        caption=f"🎨 **PARADOX Text-to-Image**\n\n"
                                f"**Prompt:** `{prompt}`\n"
-                               f"🤖 Powered by CipherElite API",
+                               f"🤖 Powered by PARADOX",
                         reply_to=event.message.id  # Note: event.message.id is the command message which is deleted, but reply_to with deleted message may cause issues. Better to reply to the status? Actually we delete command, then send new message without reply.
                     )
                 else:
@@ -72,18 +72,20 @@ async def register_commands():
                         error_msg = error_json.get('message', 'Unknown error')
                     except:
                         error_msg = response.text[:200]
-                    await status.edit(f"🎨 **CipherElite Text-to-Image**\n\n"
+                    await status.edit(f"🎨 **PARADOX Text-to-Image**\n\n"
                                     f"❌ **API Error:** {error_msg}\n"
                                     f"💡 Please check your prompt and try again.")
             else:
-                await status.edit(f"🎨 **CipherElite Text-to-Image**\n\n"
+                await status.edit(f"🎨 **PARADOX Text-to-Image**\n\n"
                                 f"❌ **HTTP Error:** {response.status_code}\n"
                                 f"💡 The API might be down or the prompt is invalid.")
                 
         except requests.exceptions.Timeout:
-            await event.reply("🎨 **CipherElite Text-to-Image**\n\n"
+            await event.reply("🎨 **PARADOX Text-to-Image**\n\n"
                             "❌ **Timeout:** The API took too long to respond.\n"
                             "💡 Please try again later.")
         except Exception as e:
-            await event.reply(f"🎨 **CipherElite Text-to-Image**\n\n"
+            await event.reply(f"🎨 **PARADOX Text-to-Image**\n\n"
                             f"❌ **Error:** {str(e)}")
+
+
